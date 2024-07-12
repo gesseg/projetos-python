@@ -1,0 +1,26 @@
+import cv2
+import pytesseract
+
+# Carregar imagem
+imagem = cv2.imread('carro.jpg')
+
+# Pré-processamento da imagem
+cinza = cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
+_, binaria = cv2.threshold(cinza, 150, 255, cv2.THRESH_BINARY)
+
+# Encontrar contornos
+contornos, _ = cv2.findContours(binaria, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+# Extrair e reconhecer placa
+for contorno in contornos:
+    x, y, w, h = cv2.boundingRect(contorno)
+    if w/h > 2:  # Filtrar contornos que se parecem com uma placa de carro
+        placa = imagem[y:y+h, x:x+w]
+        texto = pytesseract.image_to_string(placa, config='--psm 8')
+        print(f'Placa: {texto}')
+
+# Mostrar imagem com contornos
+cv2.drawContours(imagem, contornos, -1, (0, 255, 0), 2)
+cv2.imshow('Imagem', imagem)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
