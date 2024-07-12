@@ -1,0 +1,25 @@
+import tweepy
+from textblob import TextBlob
+import pandas as pd
+
+# Autenticação do Twitter
+consumer_key = 'CONSUMER_KEY'
+consumer_secret = 'CONSUMER_SECRET'
+access_token = 'ACCESS_TOKEN'
+access_token_secret = 'ACCESS_TOKEN_SECRET'
+
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+api = tweepy.API(auth)
+
+# Coletar tweets
+tweets = api.search_tweets(q='ProdutoX', lang='pt', count=100)
+tweet_data = [[tweet.text, TextBlob(tweet.text).sentiment.polarity] for tweet in tweets]
+
+# Análise de Sentimento
+df = pd.DataFrame(tweet_data, columns=['Tweet', 'Sentiment'])
+df['Sentiment'] = df['Sentiment'].apply(lambda x: 'Positivo' if x > 0 else ('Negativo' if x < 0 else 'Neutro'))
+
+# Relatório
+relatorio = df['Sentiment'].value_counts()
+print(relatorio)
